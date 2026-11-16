@@ -8,6 +8,7 @@ An Android app that counts up from the dates that matter (the day you started da
 <p align="center">
   <img src="docs/screenshots/home.png" width="230" alt="Home screen" />
   <img src="docs/screenshots/detail.png" width="230" alt="Detail screen" />
+  <img src="docs/screenshots/detail2.png" width="230" alt="Detail screen" />
   <img src="docs/screenshots/widget.png" width="230" alt="Home screen widget" />
 </p>
 
@@ -18,6 +19,8 @@ An Android app that counts up from the dates that matter (the day you started da
 | Feature | What it does |
 |---|---|
 | 📅 **Count up from any date** | Add as many dates as you want, each with its own name |
+| 🏠 **Engaging home screen** | Greeting, a "Next up" card with a countdown, and a progress bar on each date |
+| 🎉 **Today banner** | A big celebration card at the top on milestone days |
 | 🔁 **Live or Milestones only** | Live updates every day ("2 months, 1 day"). Milestones only changes once per span ("2 months") |
 | 📏 **Count in days, weeks, months or years** | Pick whatever fits the date |
 | 🎉 **Celebrations** | Monthly and yearly anniversaries, every 100 days, and weekly (if counting in weeks) |
@@ -25,7 +28,7 @@ An Android app that counts up from the dates that matter (the day you started da
 | 🔮 **Upcoming milestones** | See the next 5 milestones with dates and countdowns |
 | 🔔 **Notifications** | A reminder around 9 AM on milestone days, plus an optional heads-up the day before |
 | 🏠 **Home screen widget** | Resizable widget that updates just after midnight |
-| 🎨 **Emoji and colour per date** | 10 quick-pick emojis (or type your own) and 8 gradient colours |
+| 🎨 **Emoji and colour per date** | 10 quick-pick emojis (or type your own), 8 gradient colours, and a pink theme with dark mode |
 | 📸 **Memories timeline** | Save a note and a photo for each milestone |
 | 💾 **Backup and restore** | Export everything (dates, memories, photos) to one `.zip` and restore it on any phone |
 
@@ -111,7 +114,6 @@ To build a release APK: **Build > Generate Signed App Bundle or APK > APK**, usi
 - [ ] Small 1x1 widget
 - [ ] Countdown widget ("29 days until 3 months")
 - [ ] Custom one-off milestones (e.g. "First trip together")
-- [ ] Optional pink app theme
 
 ---
 
