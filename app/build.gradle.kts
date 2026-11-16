@@ -20,9 +20,14 @@ android {
     }
 
     buildTypes {
+        // Testing build (what "Run" installs): a separate app, so it can't touch your real data
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             optimization {
-                enable = true
+                enable = false
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
         }
