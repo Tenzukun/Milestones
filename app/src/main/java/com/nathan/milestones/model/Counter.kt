@@ -15,7 +15,7 @@ enum class CountUnit(val singular: String, val plural: String, val label: String
     YEARS("year", "years", "Years")
 }
 
-/** One special date, e.g. "Us ❤️" starting Sep 13. */
+/** One special date, e.g. "❤️ Us" starting Sep 13. */
 data class Counter(
     val id: String,
     val title: String,
@@ -25,11 +25,14 @@ data class Counter(
     /**
      * Your own celebration text. Blank = default "Happy 2 months!".
      * {n} = the number, {unit} = month/months etc, {title} = the date's name.
-     * Example: "Happy {n} {unit}, babe! ❤️" -> "Happy 2 months, babe! ❤️"
      */
     val customMessage: String = "",
     /** Send a notification on milestone days */
     val notify: Boolean = true,
     /** Also send a heads-up the day before a milestone */
-    val notifyDayBefore: Boolean = false
+    val notifyDayBefore: Boolean = false,
+    /** Shown before the title, e.g. "❤️ Us" */
+    val emoji: String = "❤️",
+    /** Which colour from CounterColors.all (0 = Pink) */
+    val colorIndex: Int = 0
 )

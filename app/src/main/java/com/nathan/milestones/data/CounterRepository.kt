@@ -50,13 +50,6 @@ class CounterRepository(context: Context) {
         prefs.edit().remove(widgetKey(widgetId)).apply()
     }
 
-    /** Used so the daily notification check only runs once per day. */
-    fun getLastNotifyCheck(): String? = prefs.getString(KEY_LAST_NOTIFY, null)
-
-    fun setLastNotifyCheck(date: String) {
-        prefs.edit().putString(KEY_LAST_NOTIFY, date).apply()
-    }
-
     private fun write(list: List<Counter>) {
         val array = JSONArray()
         list.forEach { array.put(toJson(it)) }
@@ -66,12 +59,14 @@ class CounterRepository(context: Context) {
     private fun toJson(c: Counter) = JSONObject().apply {
         put("id", c.id)
         put("title", c.title)
-        put("start", c.startDate.toString()) // e.g. 2026-09-13
+        put("start", c.startDate.toString()) // ISO format, e.g. 2026-09-13
         put("mode", c.mode.name)
         put("unit", c.unit.name)
         put("customMessage", c.customMessage)
         put("notify", c.notify)
         put("notifyDayBefore", c.notifyDayBefore)
+        put("emoji", c.emoji)
+        put("colorIndex", c.colorIndex)
     }
 
     private fun fromJson(o: JSONObject) = Counter(
@@ -80,11 +75,20 @@ class CounterRepository(context: Context) {
         startDate = LocalDate.parse(o.getString("start")),
         mode = CountMode.valueOf(o.getString("mode")),
         unit = CountUnit.valueOf(o.getString("unit")),
-        // opt... = use a default value if the field is missing
+        // opt... = use a default value if the field is missing (older saved dates)
         customMessage = o.optString("customMessage", ""),
         notify = o.optBoolean("notify", true),
-        notifyDayBefore = o.optBoolean("notifyDayBefore", false)
+        notifyDayBefore = o.optBoolean("notifyDayBefore", false),
+        emoji = o.optString("emoji", "❤️"),
+        colorIndex = o.optInt("colorIndex", 0)
     )
+
+    /** Used so each daily notification check only runs once per day. */
+    fun getLastNotifyCheck(): String? = prefs.getString(KEY_LAST_NOTIFY, null)
+
+    fun setLastNotifyCheck(date: String) {
+        prefs.edit().putString(KEY_LAST_NOTIFY, date).apply()
+    }
 
     private fun widgetKey(widgetId: Int) = "widget_$widgetId"
 

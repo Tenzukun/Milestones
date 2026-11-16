@@ -12,6 +12,7 @@ import com.nathan.milestones.MainActivity
 import com.nathan.milestones.R
 import com.nathan.milestones.data.CounterRepository
 import com.nathan.milestones.logic.MilestoneCalculator
+import com.nathan.milestones.model.CounterColors
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -37,6 +38,7 @@ object WidgetUpdater {
             views.setTextViewText(R.id.widget_headline, "Tap to choose a date")
             views.setViewVisibility(R.id.widget_celebration, View.GONE)
             views.setTextViewText(R.id.widget_detail, "")
+            views.setInt(R.id.widget_bg, "setColorFilter", 0) // default pink
             val configIntent = Intent(context, WidgetConfigActivity::class.java).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -50,7 +52,10 @@ object WidgetUpdater {
             )
         } else {
             val display = MilestoneCalculator.display(counter, LocalDate.now())
-            views.setTextViewText(R.id.widget_title, counter.title)
+            views.setTextViewText(R.id.widget_title, "${counter.emoji} ${counter.title}")
+            // Pink (0) keeps the gradient; other colours tint the background solid
+            val tint = if (counter.colorIndex == 0) 0 else CounterColors.get(counter.colorIndex).start.toInt()
+            views.setInt(R.id.widget_bg, "setColorFilter", tint)
             views.setTextViewText(R.id.widget_headline, display.headline)
             if (display.celebration != null) {
                 views.setTextViewText(R.id.widget_celebration, "🎉 ${display.celebration}")

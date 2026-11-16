@@ -1,6 +1,7 @@
 package com.nathan.milestones.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -61,37 +63,47 @@ fun CounterDetailScreen(
                 }
             }
 
-            // Big summary card
+            // Big summary card (in the date's colour)
             item {
                 Card(
                     Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent)
                 ) {
-                    Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(counter.title, style = MaterialTheme.typography.titleLarge)
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .background(counter.brush())
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            "${counter.emoji} ${counter.title}",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.White
+                        )
                         Text(
                             display.headline,
                             style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
                         display.celebration?.let {
                             Surface(
-                                color = MaterialTheme.colorScheme.primary,
+                                color = Color.White.copy(alpha = 0.25f),
                                 shape = RoundedCornerShape(50)
                             ) {
                                 Text(
                                     "🎉 $it",
-                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    color = Color.White,
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                                 )
                             }
                         }
-                        Text(display.detail, style = MaterialTheme.typography.bodyLarge)
+                        Text(display.detail, style = MaterialTheme.typography.bodyLarge, color = Color.White)
                         Text(
                             "Started ${MilestoneCalculator.formatDateWithDay(counter.startDate)}",
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.8f)
                         )
                     }
                 }

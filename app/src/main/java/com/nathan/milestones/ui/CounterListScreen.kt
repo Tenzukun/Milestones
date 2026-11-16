@@ -1,5 +1,6 @@
 package com.nathan.milestones.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -77,43 +79,48 @@ fun CounterListScreen(
 @Composable
 private fun CounterCard(counter: Counter, today: LocalDate, onClick: () -> Unit) {
     val display = MilestoneCalculator.display(counter, today)
-    val celebrating = display.celebration != null
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        // The card turns a different colour on milestone days
-        colors = if (celebrating)
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-        else CardDefaults.cardColors()
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(counter.title, style = MaterialTheme.typography.titleMedium)
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .background(counter.brush()) // the date's gradient
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                "${counter.emoji} ${counter.title}",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White
+            )
             Text(
                 display.headline,
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = Color.White
             )
             display.celebration?.let {
                 Surface(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = Color.White.copy(alpha = 0.25f),
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(
                         "🎉 $it",
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = Color.White,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                     )
                 }
             }
-            Text(display.detail, style = MaterialTheme.typography.bodyMedium)
-            display.nextMilestone?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-            Text(
-                display.modeLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
-            )
+            Text(display.detail, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.9f))
+            display.nextMilestone?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.9f))
+            }
+            Text(display.modeLabel, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
         }
     }
 }

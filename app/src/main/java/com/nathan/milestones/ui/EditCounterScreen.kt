@@ -2,7 +2,12 @@ package com.nathan.milestones.ui
 
 import android.app.DatePickerDialog
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,13 +15,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -32,13 +40,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.nathan.milestones.logic.MilestoneCalculator
 import com.nathan.milestones.model.CountMode
 import com.nathan.milestones.model.CountUnit
 import com.nathan.milestones.model.Counter
+import com.nathan.milestones.model.CounterColors
+import com.nathan.milestones.model.EMOJI_CHOICES
 import java.time.LocalDate
 import java.util.UUID
 
@@ -61,18 +75,22 @@ fun EditCounterScreen(
     var customMessage by remember { mutableStateOf(existing?.customMessage ?: "") }
     var notify by remember { mutableStateOf(existing?.notify ?: true) }
     var notifyDayBefore by remember { mutableStateOf(existing?.notifyDayBefore ?: false) }
+    var emoji by remember { mutableStateOf(existing?.emoji ?: "❤️") }
+    var colorIndex by remember { mutableStateOf(existing?.colorIndex ?: 0) }
     var confirmDelete by remember { mutableStateOf(false) }
 
     BackHandler(onBack = onCancel)
 
-    // Live preview of what the card will show
+    // Live preview of what the card and widget will show
     val preview = Counter(
         id = existing?.id ?: "preview",
         title = title.ifBlank { "Untitled" },
         startDate = startDate,
         mode = mode,
         unit = unit,
-        customMessage = customMessage
+        customMessage = customMessage,
+        emoji = emoji,
+        colorIndex = colorIndex
     )
     val display = MilestoneCalculator.display(preview, LocalDate.now())
 
@@ -93,7 +111,7 @@ fun EditCounterScreen(
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Name (e.g. Us ❤️)") },
+                label = { Text("Name (e.g. Us)") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -112,6 +130,62 @@ fun EditCounterScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(MilestoneCalculator.formatDate(startDate))
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Look", style = MaterialTheme.typography.titleMedium)
+
+                // Emoji quick picks
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    EMOJI_CHOICES.forEach { e ->
+                        Box(
+                            Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (emoji == e) MaterialTheme.colorScheme.primaryContainer
+                                    else MaterialTheme.colorScheme.surfaceVariant
+                                )
+                                .clickable { emoji = e },
+                            contentAlignment = Alignment.Center
+                        ) { Text(e, fontSize = 22.sp) }
+                    }
+                }
+                OutlinedTextField(
+                    value = emoji,
+                    onValueChange = { emoji = it.take(8) },
+                    label = { Text("Or type any emoji") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Colour circles
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    CounterColors.all.forEachIndexed { i, c ->
+                        Box(
+                            Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(c.brush())
+                                .border(
+                                    if (colorIndex == i) 3.dp else 0.dp,
+                                    MaterialTheme.colorScheme.onSurface,
+                                    CircleShape
+                                )
+                                .clickable { colorIndex = i }
+                        )
+                    }
                 }
             }
 
@@ -194,16 +268,31 @@ fun EditCounterScreen(
                 )
             }
 
-            // Preview card
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Preview", style = MaterialTheme.typography.labelLarge)
-                    Text(display.headline, style = MaterialTheme.typography.headlineSmall)
-                    display.celebration?.let {
-                        Text("🎉 $it", color = MaterialTheme.colorScheme.primary)
+            // Preview card (in your chosen colour)
+            Card(
+                Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+            ) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .background(preview.brush())
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text("Preview", style = MaterialTheme.typography.labelLarge, color = Color.White.copy(alpha = 0.8f))
+                    Text("${preview.emoji} ${preview.title}", color = Color.White)
+                    Text(
+                        display.headline,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    display.celebration?.let { Text("🎉 $it", color = Color.White) }
+                    Text(display.detail, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                    display.nextMilestone?.let {
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.9f))
                     }
-                    Text(display.detail, style = MaterialTheme.typography.bodyMedium)
-                    display.nextMilestone?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                 }
             }
 
@@ -218,7 +307,9 @@ fun EditCounterScreen(
                             unit = unit,
                             customMessage = customMessage.trim(),
                             notify = notify,
-                            notifyDayBefore = notifyDayBefore && notify
+                            notifyDayBefore = notifyDayBefore && notify,
+                            emoji = emoji.trim().ifEmpty { "❤️" },
+                            colorIndex = colorIndex
                         )
                     )
                 },
