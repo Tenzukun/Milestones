@@ -23,6 +23,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,7 +39,7 @@ import com.nathan.milestones.model.Counter
 import com.nathan.milestones.model.Memory
 import java.time.LocalDate
 
-/** Opens when you tap a card: the big count, the next 5 milestones, and your memories. */
+/** Opens when you tap a card: the big count, upcoming milestones (folded), and your memories. */
 @Composable
 fun CounterDetailScreen(
     counter: Counter,
@@ -48,7 +52,10 @@ fun CounterDetailScreen(
 ) {
     BackHandler(onBack = onBack)
     val display = MilestoneCalculator.display(counter, today)
-    val upcoming = MilestoneCalculator.upcoming(counter, today, 5)
+    // Upcoming starts folded: just the next milestone, tap "Show more" for the next 10
+    var showAllUpcoming by rememberSaveable { mutableStateOf(false) }
+    val upcoming = MilestoneCalculator.upcoming(counter, today, 10)
+    val visibleUpcoming = if (showAllUpcoming) upcoming else upcoming.take(1)
 
     Scaffold { padding ->
         LazyColumn(
@@ -116,18 +123,30 @@ fun CounterDetailScreen(
                 }
             }
 
-            // ----- Upcoming -----
+            // ----- Upcoming (folded by default) -----
             item {
-                Text(
-                    "Upcoming",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        if (showAllUpcoming) "Upcoming" else "Next milestone",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    if (upcoming.size > 1) {
+                        TextButton(onClick = { showAllUpcoming = !showAllUpcoming }) {
+                            Text(if (showAllUpcoming) "Show less ▴" else "Show more ▾")
+                        }
+                    }
+                }
             }
             if (upcoming.isEmpty()) {
                 item { Text("No milestones in the next few years.") }
             } else {
-                items(upcoming, key = { "up-" + it.date.toString() }) { item ->
+                items(visibleUpcoming, key = { "up-" + it.date.toString() }) { item ->
                     UpcomingRow(counter, item)
                 }
             }
