@@ -3,9 +3,9 @@ package com.nathan.milestones.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,10 +19,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -30,44 +31,52 @@ import com.nathan.milestones.logic.MilestoneCalculator
 import com.nathan.milestones.model.Counter
 import java.time.LocalDate
 
-/** Home screen: one card per date, plus the "+ New date" button. */
+/** Home screen: a header with Backup, one card per date, and the "+ New date" button. */
 @Composable
 fun CounterListScreen(
     counters: List<Counter>,
     today: LocalDate,
     onAdd: () -> Unit,
-    onOpen: (Counter) -> Unit
+    onOpen: (Counter) -> Unit,
+    onBackup: () -> Unit
 ) {
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = onAdd) { Text("+ New date") }
         }
     ) { padding ->
-        if (counters.isEmpty()) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "No dates yet.\nTap \"+ New date\" to add one, like the day you started dating.",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-        } else {
-            LazyColumn(
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                item {
+        LazyColumn(
+            Modifier
+                .fillMaxSize()
+                .padding(padding),
+            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Header (always shown, so you can restore on a brand new phone)
+            item {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text("Milestones", style = MaterialTheme.typography.headlineMedium)
+                    TextButton(onClick = onBackup) { Text("Backup") }
                 }
+            }
+
+            if (counters.isEmpty()) {
+                item {
+                    Text(
+                        "No dates yet.\nTap \"+ New date\" to add one, like the day you started dating.\n\n" +
+                                "New phone? Tap Backup to restore your old dates.",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 64.dp)
+                    )
+                }
+            } else {
                 items(counters, key = { it.id }) { counter ->
                     CounterCard(counter, today, onClick = { onOpen(counter) })
                 }

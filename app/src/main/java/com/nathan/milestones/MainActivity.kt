@@ -18,6 +18,7 @@ import com.nathan.milestones.logic.MilestoneCalculator
 import com.nathan.milestones.model.Counter
 import com.nathan.milestones.model.Memory
 import com.nathan.milestones.notify.MilestoneNotifier
+import com.nathan.milestones.ui.BackupScreen
 import com.nathan.milestones.ui.CounterDetailScreen
 import com.nathan.milestones.ui.CounterListScreen
 import com.nathan.milestones.ui.EditCounterScreen
@@ -34,6 +35,7 @@ private sealed interface Screen {
     data class Edit(val existing: Counter?) : Screen
     /** existing = null means creating a new memory for counterId */
     data class EditMemory(val counterId: String, val existing: Memory?) : Screen
+    data object Backup : Screen
 }
 
 class MainActivity : ComponentActivity() {
@@ -67,7 +69,13 @@ class MainActivity : ComponentActivity() {
                         counters = counters,
                         today = today,
                         onAdd = { screen = Screen.Edit(null) },
-                        onOpen = { screen = Screen.Detail(it.id) } // tap a card = details
+                        onOpen = { screen = Screen.Detail(it.id) }, // tap a card = details
+                        onBackup = { screen = Screen.Backup }
+                    )
+
+                    is Screen.Backup -> BackupScreen(
+                        onBack = { screen = Screen.Home },
+                        onRestored = { refresh() } // show the restored dates right away
                     )
 
                     is Screen.Detail -> {
