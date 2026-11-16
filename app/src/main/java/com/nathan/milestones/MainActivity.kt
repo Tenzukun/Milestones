@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import com.nathan.milestones.data.CounterRepository
@@ -22,6 +23,7 @@ import com.nathan.milestones.model.Counter
 import com.nathan.milestones.model.Memory
 import com.nathan.milestones.notify.MilestoneNotifier
 import com.nathan.milestones.ui.BackupScreen
+import com.nathan.milestones.ui.ConfettiOverlay
 import com.nathan.milestones.ui.CounterDetailScreen
 import com.nathan.milestones.ui.CounterListScreen
 import com.nathan.milestones.ui.EditCounterScreen
@@ -168,6 +170,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
+                }
+
+                // 🎊 Confetti once per app open when any date has a milestone today
+                var confettiShown by rememberSaveable { mutableStateOf(false) }
+                val celebratingToday = counters.any { MilestoneCalculator.celebrationOn(it, today) != null }
+                if (celebratingToday && !confettiShown) {
+                    ConfettiOverlay(onFinished = { confettiShown = true })
                 }
 
                 // "Update available" popup (on top of whatever screen is showing)
