@@ -67,6 +67,7 @@ class CounterRepository(context: Context) {
         put("notifyDayBefore", c.notifyDayBefore)
         put("emoji", c.emoji)
         put("colorIndex", c.colorIndex)
+        c.customColor?.let { put("customColor", it) } // only saved if you picked your own
     }
 
     private fun fromJson(o: JSONObject) = Counter(
@@ -80,7 +81,8 @@ class CounterRepository(context: Context) {
         notify = o.optBoolean("notify", true),
         notifyDayBefore = o.optBoolean("notifyDayBefore", false),
         emoji = o.optString("emoji", "❤️"),
-        colorIndex = o.optInt("colorIndex", 0)
+        colorIndex = o.optInt("colorIndex", 0),
+        customColor = if (o.has("customColor")) o.getLong("customColor") else null
     )
 
     /** Used so each daily notification check only runs once per day. */

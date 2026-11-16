@@ -77,6 +77,8 @@ fun EditCounterScreen(
     var notifyDayBefore by remember { mutableStateOf(existing?.notifyDayBefore ?: false) }
     var emoji by remember { mutableStateOf(existing?.emoji ?: "❤️") }
     var colorIndex by remember { mutableStateOf(existing?.colorIndex ?: 0) }
+    var customColor by remember { mutableStateOf(existing?.customColor) }
+    var showColorPicker by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
 
     BackHandler(onBack = onCancel)
@@ -90,7 +92,8 @@ fun EditCounterScreen(
         unit = unit,
         customMessage = customMessage,
         emoji = emoji,
-        colorIndex = colorIndex
+        colorIndex = colorIndex,
+        customColor = customColor
     )
     val display = MilestoneCalculator.display(preview, LocalDate.now())
 
@@ -165,7 +168,7 @@ fun EditCounterScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Colour circles
+                // Colour circles: 8 presets + your own colour at the end
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -179,11 +182,35 @@ fun EditCounterScreen(
                                 .clip(CircleShape)
                                 .background(c.brush())
                                 .border(
-                                    if (colorIndex == i) 3.dp else 0.dp,
+                                    if (customColor == null && colorIndex == i) 3.dp else 0.dp,
                                     MaterialTheme.colorScheme.onSurface,
                                     CircleShape
                                 )
-                                .clickable { colorIndex = i }
+                                .clickable {
+                                    colorIndex = i
+                                    customColor = null // picking a preset clears the custom colour
+                                }
+                        )
+                    }
+                    // Custom colour: shows your colour once picked, a rainbow "+" before that
+                    Box(
+                        Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(customColor?.let { CounterColors.fromCustom(it).brush() } ?: RainbowBrush)
+                            .border(
+                                if (customColor != null) 3.dp else 0.dp,
+                                MaterialTheme.colorScheme.onSurface,
+                                CircleShape
+                            )
+                            .clickable { showColorPicker = true },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            if (customColor == null) "+" else "✎",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
                         )
                     }
                 }
@@ -309,7 +336,8 @@ fun EditCounterScreen(
                             notify = notify,
                             notifyDayBefore = notifyDayBefore && notify,
                             emoji = emoji.trim().ifEmpty { "❤️" },
-                            colorIndex = colorIndex
+                            colorIndex = colorIndex,
+                            customColor = customColor
                         )
                     )
                 },
@@ -328,6 +356,17 @@ fun EditCounterScreen(
             }
             Spacer(Modifier.height(24.dp))
         }
+    }
+
+    if (showColorPicker) {
+        ColorPickerDialog(
+            initial = customColor,
+            onPick = {
+                customColor = it
+                showColorPicker = false
+            },
+            onDismiss = { showColorPicker = false }
+        )
     }
 
     if (confirmDelete && onDelete != null) {

@@ -28,12 +28,11 @@ object WidgetUpdater {
     }
 
     fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
-        // RemoteViews = a layout that runs inside the home screen app, not inside our app
         val views = RemoteViews(context.packageName, R.layout.widget_counter)
         val counter = CounterRepository(context).getWidgetCounter(widgetId)
 
         if (counter == null) {
-            // Not set up yet, or its date was deleted: tapping opens the picker
+            // Widget not set up yet, or its date was deleted: tapping opens the picker
             views.setTextViewText(R.id.widget_title, "Milestones")
             views.setTextViewText(R.id.widget_headline, "Tap to choose a date")
             views.setViewVisibility(R.id.widget_celebration, View.GONE)
@@ -53,8 +52,9 @@ object WidgetUpdater {
         } else {
             val display = MilestoneCalculator.display(counter, LocalDate.now())
             views.setTextViewText(R.id.widget_title, "${counter.emoji} ${counter.title}")
-            // Pink (0) keeps the gradient; other colours tint the background solid
-            val tint = if (counter.colorIndex == 0) 0 else CounterColors.get(counter.colorIndex).start.toInt()
+            // Default pink keeps the gradient; any other colour (preset or custom) tints the background
+            val isDefaultPink = counter.customColor == null && counter.colorIndex == 0
+            val tint = if (isDefaultPink) 0 else CounterColors.forCounter(counter).start.toInt()
             views.setInt(R.id.widget_bg, "setColorFilter", tint)
             views.setTextViewText(R.id.widget_headline, display.headline)
             if (display.celebration != null) {
@@ -67,11 +67,11 @@ object WidgetUpdater {
                 R.id.widget_detail,
                 display.nextShort?.let { "Next: $it" } ?: display.detail
             )
-            // Tapping the widget opens the app
+            val openApp = Intent(context, MainActivity::class.java)
             views.setOnClickPendingIntent(
                 R.id.widget_root,
                 PendingIntent.getActivity(
-                    context, widgetId, Intent(context, MainActivity::class.java),
+                    context, widgetId, openApp,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
             )
@@ -81,7 +81,8 @@ object WidgetUpdater {
 
     /**
      * Sets an alarm for just after midnight so widgets flip to the new day.
-     * Inexact alarm = no special permission needed. It may fire a few minutes late, which is fine.
+     * Uses an inexact alarm, so no special alarm permission is needed.
+     * It may fire a few minutes late if the phone is asleep, which is fine.
      */
     fun scheduleMidnightUpdate(context: Context) {
         val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return

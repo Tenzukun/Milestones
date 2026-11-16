@@ -33,6 +33,8 @@ data class Counter(
     val notifyDayBefore: Boolean = false,
     /** Shown before the title, e.g. "❤️ Us" */
     val emoji: String = "❤️",
-    /** Which colour from CounterColors.all (0 = Pink) */
-    val colorIndex: Int = 0
+    /** Which preset colour from CounterColors.all (0 = Pink). Ignored if customColor is set. */
+    val colorIndex: Int = 0,
+    /** A colour you picked yourself (0xAARRGGBB), or null to use the preset */
+    val customColor: Long? = null
 )
