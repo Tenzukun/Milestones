@@ -1,6 +1,8 @@
 package com.nathan.milestones
 
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
 import com.nathan.milestones.data.CounterRepository
 import com.nathan.milestones.data.MemoryRepository
 import com.nathan.milestones.logic.MilestoneCalculator
@@ -23,8 +26,14 @@ import com.nathan.milestones.ui.CounterDetailScreen
 import com.nathan.milestones.ui.CounterListScreen
 import com.nathan.milestones.ui.EditCounterScreen
 import com.nathan.milestones.ui.EditMemoryScreen
+import com.nathan.milestones.ui.UpdateDialog
 import com.nathan.milestones.ui.theme.MilestonesTheme
+import com.nathan.milestones.update.UpdateChecker
+import com.nathan.milestones.update.UpdateInfo
 import com.nathan.milestones.widget.WidgetUpdater
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 /** Which screen is showing. */
@@ -45,6 +54,12 @@ class MainActivity : ComponentActivity() {
     private var counters by mutableStateOf(listOf<Counter>())
     private var memories by mutableStateOf(listOf<Memory>())
     private var today by mutableStateOf(LocalDate.now())
+    private var updateInfo by mutableStateOf<UpdateInfo?>(null)
+
+    /** The installed version, e.g. "1.1" (or "1.1-debug" for Milestones Dev) */
+    private val currentVersion: String by lazy {
+        runCatching { packageManager.getPackageInfo(packageName, 0).versionName }.getOrNull() ?: "0"
+    }
 
     // Android 13+ shows an "Allow notifications?" popup. Nothing extra to do with the answer.
     private val notificationPermission =
@@ -59,6 +74,11 @@ class MainActivity : ComponentActivity() {
 
         // Ask for notification permission if any date has notifications turned on
         if (repo.getAll().any { it.notify }) askForNotificationPermission()
+
+        // Check GitHub for a newer version in the background (shows a popup if there is one)
+        lifecycleScope.launch {
+            updateInfo = withContext(Dispatchers.IO) { UpdateChecker.check(currentVersion) }
+        }
 
         setContent {
             MilestonesTheme {
@@ -148,6 +168,20 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
+                }
+
+                // "Update available" popup (on top of whatever screen is showing)
+                updateInfo?.let { info ->
+                    UpdateDialog(
+                        info = info,
+                        currentVersion = currentVersion,
+                        onDownload = {
+                            // Opens the .apk link in the browser, which downloads it
+                            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info.downloadUrl)))
+                            updateInfo = null
+                        },
+                        onLater = { updateInfo = null }
+                    )
                 }
             }
         }
