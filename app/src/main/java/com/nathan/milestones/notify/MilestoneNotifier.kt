@@ -33,7 +33,7 @@ object MilestoneNotifier {
 
     const val ACTION_DAILY_CHECK = "com.nathan.milestones.ACTION_DAILY_CHECK"
     private const val CHANNEL_ID = "milestones"
-    private val CHECK_TIME: LocalTime = LocalTime.of(19, 34) // change this to pick a different time
+    private val CHECK_TIME: LocalTime = LocalTime.of(9, 0) // change this to pick a different time
 
     /** Android 8+ needs a "channel" before showing notifications. Safe to call many times. */
     fun createChannel(context: Context) {
