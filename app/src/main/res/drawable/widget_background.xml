@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pink to peach gradient with rounded corners. Change the colours to restyle the widget. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="24dp" />
+    <gradient
+        android:angle="45"
+        android:startColor="#FFE0457B"
+        android:endColor="#FFFF9671"
+        android:type="linear" />
+</shape>

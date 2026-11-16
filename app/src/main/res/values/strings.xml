@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Milestones</string>
+    <string name="widget_description">Counts up from a special date and celebrates milestones</string>
 </resources>

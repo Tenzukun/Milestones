@@ -17,6 +17,8 @@ import com.nathan.milestones.ui.EditCounterScreen
 import com.nathan.milestones.ui.theme.MilestonesTheme
 import java.time.LocalDate
 
+import com.nathan.milestones.widget.WidgetUpdater
+
 /** Which screen is showing. */
 private sealed interface Screen {
     data object Home : Screen
@@ -91,10 +93,12 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         refresh()
+        WidgetUpdater.scheduleMidnightUpdate(this)
     }
 
     private fun refresh() {
         counters = repo.getAll()
         today = LocalDate.now()
+        WidgetUpdater.updateAll(this) // keep home screen widgets in sync
     }
 }
