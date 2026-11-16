@@ -25,12 +25,14 @@ An Android app that counts up from the dates that matter (the day you started da
 | 📏 **Count in days, weeks, months or years** | Pick whatever fits the date |
 | 🎉 **Celebrations** | Monthly and yearly anniversaries, every 100 days, and weekly (if counting in weeks) |
 | 💬 **Custom messages** | Write your own, e.g. `Happy {n} {unit}, babe! ❤️` becomes "Happy 3 months, babe! ❤️" |
-| 🔮 **Upcoming milestones** | See the next 5 milestones with dates and countdowns |
+| 🔮 **Upcoming milestones** | See your next milestone, tap **Show more** for the next 10 |
 | 🔔 **Notifications** | A reminder around 9 AM on milestone days, plus an optional heads-up the day before |
 | 🏠 **Home screen widget** | Resizable widget that updates just after midnight |
-| 🎨 **Emoji and colour per date** | 10 quick-pick emojis (or type your own), 8 gradient colours, and a pink theme with dark mode |
+| 🎨 **Emoji and colour per date** | 10 quick-pick emojis (or type your own), 8 preset gradients, or pick any colour with sliders or a hex code |
 | 📸 **Memories timeline** | Save a note and a photo for each milestone |
 | 💾 **Backup and restore** | Export everything (dates, memories, photos) to one `.zip` and restore it on any phone |
+| 🎊 **Confetti** | Open the app on a milestone day and it rains confetti |
+| ⬆️ **Update alerts** | The app tells you when a new version is out on GitHub |
 
 ---
 
@@ -42,7 +44,7 @@ An Android app that counts up from the dates that matter (the day you started da
 
 **Requirements:** Android 8.0 or newer.
 
-**Updating:** install the new APK over the old one. Your dates and memories are kept.
+**Updating:** from v1.2 on, the app shows a popup when a new version is out. Tap **Download**, open the file and tap **Update**. Your dates and memories are kept.
 
 ---
 
@@ -110,7 +112,6 @@ To build a release APK: **Build > Generate Signed App Bundle or APK > APK**, usi
 
 ## 🗺️ Roadmap
 
-- [ ] Confetti on milestone days
 - [ ] Small 1x1 widget
 - [ ] Countdown widget ("29 days until 3 months")
 - [ ] Custom one-off milestones (e.g. "First trip together")
