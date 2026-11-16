@@ -101,6 +101,4 @@ class MainActivity : ComponentActivity() {
         today = LocalDate.now()
         WidgetUpdater.updateAll(this) // keep home screen widgets in sync
     }
-}clear
-git add . ; git commit -m "Add home screen widget" ; git status
-git push
+}
