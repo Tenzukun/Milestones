@@ -51,7 +51,7 @@ fun BackupScreen(onBack: () -> Unit, onRestored: () -> Unit) {
                 status = try {
                     // Runs in the background so the app doesn't freeze with lots of photos
                     val (dates, memories) = withContext(Dispatchers.IO) { BackupManager.export(context, uri) }
-                    "✅ Backup saved: $dates dates, $memories memories."
+                    "✅ Backup saved: ${plural(dates, "date")}, ${plural(memories, "memory", "memories")}."
                 } catch (e: Exception) {
                     "❌ Backup failed: ${e.message}"
                 }
@@ -125,7 +125,7 @@ fun BackupScreen(onBack: () -> Unit, onRestored: () -> Unit) {
                         status = try {
                             val (dates, memories) = withContext(Dispatchers.IO) { BackupManager.restore(context, uri) }
                             onRestored()
-                            "✅ Restored $dates dates and $memories memories."
+                            "✅ Restored ${plural(dates, "date")} and ${plural(memories, "memory", "memories")}."
                         } catch (e: Exception) {
                             "❌ Restore failed: ${e.message}"
                         }
@@ -139,3 +139,7 @@ fun BackupScreen(onBack: () -> Unit, onRestored: () -> Unit) {
         )
     }
 }
+
+/** "1 date", "2 dates", "1 memory", "3 memories" */
+private fun plural(n: Int, one: String, many: String = one + "s"): String =
+    "$n ${if (n == 1) one else many}"
