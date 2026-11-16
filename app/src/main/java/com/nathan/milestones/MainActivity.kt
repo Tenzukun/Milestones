@@ -1,9 +1,12 @@
 package com.nathan.milestones
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,13 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.nathan.milestones.data.CounterRepository
 import com.nathan.milestones.model.Counter
+import com.nathan.milestones.notify.MilestoneNotifier
 import com.nathan.milestones.ui.CounterDetailScreen
 import com.nathan.milestones.ui.CounterListScreen
 import com.nathan.milestones.ui.EditCounterScreen
 import com.nathan.milestones.ui.theme.MilestonesTheme
-import java.time.LocalDate
-
 import com.nathan.milestones.widget.WidgetUpdater
+import java.time.LocalDate
 
 /** Which screen is showing. */
 private sealed interface Screen {
@@ -33,10 +36,18 @@ class MainActivity : ComponentActivity() {
     private var counters by mutableStateOf(listOf<Counter>())
     private var today by mutableStateOf(LocalDate.now())
 
+    // Android 13+ shows an "Allow notifications?" popup. Nothing extra to do with the answer.
+    private val notificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         repo = CounterRepository(this)
+        MilestoneNotifier.createChannel(this)
         enableEdgeToEdge()
+
+        // Ask for notification permission if any date has notifications turned on
+        if (repo.getAll().any { it.notify }) askForNotificationPermission()
 
         setContent {
             MilestonesTheme {
@@ -70,6 +81,7 @@ class MainActivity : ComponentActivity() {
                         onSave = { counter ->
                             repo.save(counter)
                             refresh()
+                            if (counter.notify) askForNotificationPermission()
                             screen = Screen.Detail(counter.id) // show the saved date
                         },
                         onDelete = s.existing?.let { existing ->
@@ -94,11 +106,21 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         refresh()
         WidgetUpdater.scheduleMidnightUpdate(this)
+        MilestoneNotifier.scheduleDailyCheck(this)
     }
 
+    /** Reloads dates from storage and keeps home screen widgets in sync. */
     private fun refresh() {
         counters = repo.getAll()
         today = LocalDate.now()
-        WidgetUpdater.updateAll(this) // keep home screen widgets in sync
+        WidgetUpdater.updateAll(this)
+    }
+
+    private fun askForNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !MilestoneNotifier.hasPermission(this)
+        ) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 }
